@@ -56,20 +56,20 @@ export function Hero() {
             <div className="absolute right-1/4 bottom-1/4 h-48 w-48 rounded-full bg-cosmic-gold/30" />
           </div>
           <div className="animate-float">
-            <CardMockup imageUrl="/cosmic_sentinel.png" />
+            <CardMockup imageUrl="/hero-1.png" />
           </div>
           {/* Second smaller card behind */}
           <div
             className="pointer-events-none absolute -left-10 top-10 hidden w-48 opacity-60 sm:block animate-float"
             style={{ transform: "rotate(-12deg)", animationDelay: "-1.5s" }}
           >
-            <CardMockup name="VOID HUNTER" role="Legendary · 4★" power={7400} hueA="#7C3AED" hueB="#F59E0B" imageUrl="/void_hunter.png" />
+            <CardMockup name="VOID HUNTER" role="Legendary · 4★" power={7400} hueA="#7C3AED" hueB="#F59E0B" imageUrl="/hero-2.png" />
           </div>
           <div
             className="pointer-events-none absolute -right-8 bottom-6 hidden w-44 opacity-60 sm:block animate-float"
             style={{ transform: "rotate(10deg)", animationDelay: "-3s" }}
           >
-            <CardMockup name="NOVA STRIKER" role="Epic · 4★" power={6120} hueA="#0EA5E9" hueB="#DC2626" imageUrl="/nova_striker.png" />
+            <CardMockup name="NOVA STRIKER" role="Epic · 4★" power={6120} hueA="#0EA5E9" hueB="#DC2626" imageUrl="/hero-3.png" />
           </div>
         </div>
       </div>
