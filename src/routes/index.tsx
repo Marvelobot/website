@@ -7,6 +7,7 @@ import { PvPArena } from "@/components/marvelo/PvPArena";
 import { HowItWorks } from "@/components/marvelo/HowItWorks";
 import { Progression } from "@/components/marvelo/Progression";
 import { StatsCounter } from "@/components/marvelo/StatsCounter";
+import { Team } from "@/components/marvelo/Team";
 import { FinalCTA } from "@/components/marvelo/FinalCTA";
 import { Footer } from "@/components/marvelo/Footer";
 
@@ -42,6 +43,7 @@ function Index() {
         <HowItWorks />
         <Progression />
         <StatsCounter />
+        <Team />
         <FinalCTA />
       </main>
       <Footer />
