@@ -7,6 +7,7 @@ const links = [
   { label: "PvP Arena", href: "#arena" },
   { label: "How It Works", href: "#how" },
   { label: "Progression", href: "#progression" },
+  { label: "Team", href: "#team" },
 ];
 
 export function Navbar() {
