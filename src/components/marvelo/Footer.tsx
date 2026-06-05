@@ -3,19 +3,35 @@ import { DiscordIcon, GithubIcon, XIcon } from "./icons";
 const cols = [
   {
     title: "Marvelo",
-    links: [["About", "#"], ["Changelog", "#"], ["Status", "#"]],
+    links: [
+      ["About", "#"],
+      ["Changelog", "#"],
+      ["Status", "#"],
+    ],
   },
   {
     title: "Quick Links",
-    links: [["Features", "#features"], ["Showcase", "#showcase"], ["PvP Arena", "#arena"]],
+    links: [
+      ["Features", "#features"],
+      ["Showcase", "#showcase"],
+      ["PvP Arena", "#arena"],
+    ],
   },
   {
     title: "Community",
-    links: [["Discord Server", "#"], ["Guild Directory", "#"], ["Support", "#"]],
+    links: [
+      ["Discord Server", "#"],
+      ["Guild Directory", "#"],
+      ["Support", "#"],
+    ],
   },
   {
     title: "Legal",
-    links: [["Terms", "#"], ["Privacy", "#"], ["Fair Play", "#"]],
+    links: [
+      ["Terms", "#"],
+      ["Privacy", "#"],
+      ["Fair Play", "#"],
+    ],
   },
 ];
 
@@ -25,10 +41,12 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
-            <div className="font-display text-xl font-black tracking-[0.25em] text-white">MARVELO</div>
+            <div className="font-display text-xl font-black tracking-[0.25em] text-white">
+              MARVELO
+            </div>
             <p className="mt-4 max-w-xs text-sm text-white/55">
-              The premier Marvel-themed card collecting and battle experience built
-              for Discord communities.
+              The premier Marvel-themed card collecting and battle experience built for Discord
+              communities.
             </p>
             <div className="mt-6 flex items-center gap-3">
               {[
@@ -50,11 +68,16 @@ export function Footer() {
 
           {cols.map((c) => (
             <div key={c.title}>
-              <h4 className="font-display text-xs uppercase tracking-[0.25em] text-white/80">{c.title}</h4>
+              <h4 className="font-display text-xs uppercase tracking-[0.25em] text-white/80">
+                {c.title}
+              </h4>
               <ul className="mt-4 space-y-2.5">
                 {c.links.map(([label, href]) => (
                   <li key={label}>
-                    <a href={href} className="text-sm text-white/55 transition-colors hover:text-white">
+                    <a
+                      href={href}
+                      className="text-sm text-white/55 transition-colors hover:text-white"
+                    >
                       {label}
                     </a>
                   </li>

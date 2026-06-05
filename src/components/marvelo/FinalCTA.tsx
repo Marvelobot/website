@@ -16,8 +16,8 @@ export function FinalCTA() {
             Your Collection <span className="text-gradient-hero">Awaits</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-white/65">
-            Add MARVELO to your server in seconds. The drop you've been waiting for
-            is one command away.
+            Add MARVELO to your server in seconds. The drop you've been waiting for is one command
+            away.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
             <a

@@ -47,10 +47,9 @@ export function StatsCounter() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && setRun(true),
-      { threshold: 0.3 },
-    );
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setRun(true), {
+      threshold: 0.3,
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);

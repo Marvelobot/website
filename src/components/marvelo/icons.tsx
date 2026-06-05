@@ -116,9 +116,13 @@ export const XIcon = (p: IconProps) => (
 );
 
 export const MenuIcon = (p: IconProps) => (
-  <svg {...base} {...p}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+  <svg {...base} {...p}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
 );
 
 export const CloseIcon = (p: IconProps) => (
-  <svg {...base} {...p}><path d="M6 6l12 12M18 6L6 18" /></svg>
+  <svg {...base} {...p}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
 );

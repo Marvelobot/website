@@ -1,13 +1,11 @@
-import {
-  CollectionIcon, DustIcon, EventIcon, LevelIcon, MarketIcon, TradeIcon,
-} from "./icons";
+import { CollectionIcon, DustIcon, EventIcon, LevelIcon, MarketIcon, TradeIcon } from "./icons";
 
 const tiles = [
   {
     title: "Card Collection",
     desc: "Curate frames, character grids, and ascended editions in one elegant gallery.",
     icon: CollectionIcon,
-    span: "lg:col-span-2 lg:row-span-2",
+    span: "lg:col-span-2 lg:row-span-3",
     visual: "grid",
   },
   {
@@ -51,21 +49,12 @@ function Visual({ kind }: { kind: string }) {
   switch (kind) {
     case "grid":
       return (
-        <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-6">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[3/4] rounded-md border border-white/10"
-              style={{
-                background:
-                  i % 5 === 0
-                    ? "linear-gradient(160deg, #DC262644, #F59E0B22)"
-                    : i % 3 === 0
-                      ? "linear-gradient(160deg, #7C3AED33, #0ea5e922)"
-                      : "linear-gradient(160deg, #ffffff08, #ffffff03)",
-              }}
-            />
-          ))}
+        <div className="mt-5 flex-1 min-h-0 overflow-hidden rounded-lg border border-white/10 bg-black/30">
+          <img
+            src="/collection.png"
+            alt="Card Collection Preview"
+            className="h-full w-full object-cover object-top hover:scale-[1.03] transition-transform duration-500"
+          />
         </div>
       );
     case "chart":
@@ -78,7 +67,12 @@ function Visual({ kind }: { kind: string }) {
             </linearGradient>
           </defs>
           <path d="M0 60 Q40 30 70 40 T140 25 T200 15 L200 80 L0 80 Z" fill="url(#ch)" />
-          <path d="M0 60 Q40 30 70 40 T140 25 T200 15" stroke="#F59E0B" strokeWidth="1.5" fill="none" />
+          <path
+            d="M0 60 Q40 30 70 40 T140 25 T200 15"
+            stroke="#F59E0B"
+            strokeWidth="1.5"
+            fill="none"
+          />
         </svg>
       );
     case "bars":
@@ -89,7 +83,9 @@ function Visual({ kind }: { kind: string }) {
               <div className="h-full rounded-full bg-gradient-hero" style={{ width: `${w}%` }} />
             </div>
           ))}
-          <div className="pt-2 font-display text-2xl text-white">LVL 87<span className="text-white/40 text-base">/100</span></div>
+          <div className="pt-2 font-display text-2xl text-white">
+            LVL 87<span className="text-white/40 text-base">/100</span>
+          </div>
         </div>
       );
     case "event":
@@ -112,7 +108,14 @@ function Visual({ kind }: { kind: string }) {
       return (
         <div className="mt-6 flex items-center justify-between gap-2">
           <div className="h-16 w-12 rounded border border-white/10 bg-gradient-to-br from-marvel-red/30 to-transparent" />
-          <svg className="h-6 w-6 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="1.5" d="M4 8h13l-3-3M20 16H7l3 3" /></svg>
+          <svg
+            className="h-6 w-6 text-white/50"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path strokeWidth="1.5" d="M4 8h13l-3-3M20 16H7l3 3" />
+          </svg>
           <div className="h-16 w-12 rounded border border-white/10 bg-gradient-to-br from-cosmic-gold/30 to-transparent" />
         </div>
       );
@@ -139,8 +142,8 @@ export function FeaturesBento() {
             Everything a collector needs
           </h2>
           <p className="mt-4 text-white/60">
-            A complete card-game economy living natively inside Discord — built for
-            speed, depth, and obsession.
+            A complete card-game economy living natively inside Discord — built for speed, depth,
+            and obsession.
           </p>
         </div>
 

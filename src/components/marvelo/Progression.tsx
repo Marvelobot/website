@@ -1,6 +1,14 @@
 import { StarIcon } from "./icons";
 
-const ranks = ["Newcomer", "Enthusiast", "Veteran", "Hero", "Avenger", "Cosmic Entity", "Living Tribunal"];
+const ranks = [
+  "Newcomer",
+  "Enthusiast",
+  "Veteran",
+  "Hero",
+  "Avenger",
+  "Cosmic Entity",
+  "Living Tribunal",
+];
 const stars = [
   { s: "1★", m: "1.0x" },
   { s: "2★", m: "1.25x" },
@@ -19,8 +27,8 @@ export function Progression() {
             From Newcomer to Living Tribunal
           </h2>
           <p className="mt-4 text-white/60">
-            Seven collector ranks chart your ascent. Each tier unlocks new frames,
-            spawn bonuses, and arena rewards.
+            Seven collector ranks chart your ascent. Each tier unlocks new frames, spawn bonuses,
+            and arena rewards.
           </p>
         </div>
 
@@ -37,7 +45,9 @@ export function Progression() {
                   >
                     {i + 1}
                   </span>
-                  <span className="mt-3 text-[11px] uppercase tracking-widest text-white/70">{r}</span>
+                  <span className="mt-3 text-[11px] uppercase tracking-widest text-white/70">
+                    {r}
+                  </span>
                 </li>
               ))}
             </ol>
@@ -46,7 +56,9 @@ export function Progression() {
 
         {/* Star fusion */}
         <div className="mt-20">
-          <h3 className="font-display text-sm uppercase tracking-[0.3em] text-white/70">Star Fusion Multipliers</h3>
+          <h3 className="font-display text-sm uppercase tracking-[0.3em] text-white/70">
+            Star Fusion Multipliers
+          </h3>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
             {stars.map((s, i) => (
               <div

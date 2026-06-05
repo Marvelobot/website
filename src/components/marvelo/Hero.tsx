@@ -10,14 +10,12 @@ export function Hero() {
           </span>
 
           <h1 className="mt-6 font-display text-5xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Build Your Ultimate{" "}
-            <span className="text-gradient-hero">Marvel Squad</span>
+            Build Your Ultimate <span className="text-gradient-hero">Marvel Squad</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg">
-            Summon legendary heroes, ascend cards through 5-star fusion, and command
-            your squad in real-time 3v3 PvP arenas. Built for collectors, tuned for
-            tacticians.
+            Summon legendary heroes, ascend cards through 5-star fusion, and command your squad in
+            real-time 3v3 PvP arenas. Built for collectors, tuned for tacticians.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -63,13 +61,27 @@ export function Hero() {
             className="pointer-events-none absolute -left-10 top-10 hidden w-48 opacity-90 sm:block animate-float"
             style={{ transform: "rotate(-12deg)", animationDelay: "-1.5s" }}
           >
-            <CardMockup name="VOID HUNTER" role="Legendary · 4★" power={7400} hueA="#7C3AED" hueB="#F59E0B" imageUrl="/hero-2.png" />
+            <CardMockup
+              name="VOID HUNTER"
+              role="Legendary · 4★"
+              power={7400}
+              hueA="#7C3AED"
+              hueB="#F59E0B"
+              imageUrl="/hero-2.png"
+            />
           </div>
           <div
             className="pointer-events-none absolute -right-8 bottom-6 hidden w-44 opacity-90 sm:block animate-float"
             style={{ transform: "rotate(10deg)", animationDelay: "-3s" }}
           >
-            <CardMockup name="NOVA STRIKER" role="Epic · 4★" power={6120} hueA="#0EA5E9" hueB="#DC2626" imageUrl="/hero-3.png" />
+            <CardMockup
+              name="NOVA STRIKER"
+              role="Epic · 4★"
+              power={6120}
+              hueA="#0EA5E9"
+              hueB="#DC2626"
+              imageUrl="/hero-3.png"
+            />
           </div>
         </div>
       </div>

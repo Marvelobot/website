@@ -30,11 +30,7 @@ export function CardMockup({
       {/* Card Artwork / Image */}
       {imageUrl ? (
         <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+          <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
         </div>
       ) : (
         /* Character silhouette — abstract SVG */
@@ -61,7 +57,12 @@ export function CardMockup({
             stroke="url(#figStroke)"
             strokeWidth="1.2"
           />
-          <path d="M100 60 L100 200 M70 100 L130 100 M65 140 L135 140" stroke="url(#figStroke)" strokeWidth="0.7" opacity="0.7" />
+          <path
+            d="M100 60 L100 200 M70 100 L130 100 M65 140 L135 140"
+            stroke="url(#figStroke)"
+            strokeWidth="0.7"
+            opacity="0.7"
+          />
         </svg>
       )}
 
@@ -70,14 +71,11 @@ export function CardMockup({
         <div
           className="absolute -inset-y-10 left-0 w-1/3 animate-sheen group-hover:w-1/2"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)",
           }}
         />
         {/* Secondary subtle shining sweep on hover */}
-        <div
-          className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
 
       {/* Top tag */}
@@ -86,7 +84,9 @@ export function CardMockup({
           <span className="rounded-full border border-white/10 bg-black/55 px-2 py-1 backdrop-blur">
             {role}
           </span>
-          <span className="font-display text-[10px] text-cosmic-gold bg-black/40 px-2 py-1 rounded-full border border-white/5 backdrop-blur">PWR {power.toLocaleString()}</span>
+          <span className="font-display text-[10px] text-cosmic-gold bg-black/40 px-2 py-1 rounded-full border border-white/5 backdrop-blur">
+            PWR {power.toLocaleString()}
+          </span>
         </div>
       )}
 
@@ -94,7 +94,9 @@ export function CardMockup({
       {!imageUrl && (
         <div className="absolute bottom-0 left-0 right-0 z-20 p-4">
           <div className="rounded-lg border border-white/10 bg-black/65 px-3 py-2 backdrop-blur">
-            <div className="font-display text-sm tracking-widest text-white group-hover:text-gradient-hero transition-colors duration-300">{name}</div>
+            <div className="font-display text-sm tracking-widest text-white group-hover:text-gradient-hero transition-colors duration-300">
+              {name}
+            </div>
             <div className="mt-1 flex items-center gap-2 text-[10px] text-white/60">
               <BoltIcon className="h-3 w-3 text-cosmic-gold" />
               <span>ASCENDED · TIER V</span>
@@ -105,7 +107,6 @@ export function CardMockup({
 
       {/* Inner glow ring */}
       <div className="pointer-events-none absolute inset-0 z-20 rounded-2xl ring-1 ring-inset ring-white/10" />
-
     </div>
   );
 }

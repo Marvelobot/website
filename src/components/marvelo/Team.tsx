@@ -20,7 +20,7 @@ const initialTeam: TeamMember[] = [
     discordId: "1203044941669081149",
     discordTag: "yogeswar",
     githubUrl: "https://github.com/yogeswar142",
-  }
+  },
 ];
 
 export function Team() {
@@ -57,9 +57,11 @@ function MemberCard({ member }: { member: TeamMember }) {
   // Safe default Discord avatar calculation
   const defaultIndex = Number((BigInt(member.discordId) >> 22n) % 6n);
   const [avatarUrl, setAvatarUrl] = useState<string>(
-    `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`
+    `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`,
   );
-  const [presenceStatus, setPresenceStatus] = useState<"online" | "idle" | "dnd" | "offline" | null>(null);
+  const [presenceStatus, setPresenceStatus] = useState<
+    "online" | "idle" | "dnd" | "offline" | null
+  >(null);
 
   useEffect(() => {
     fetch(`https://api.lanyard.rest/v1/users/${member.discordId}`)
@@ -70,7 +72,7 @@ function MemberCard({ member }: { member: TeamMember }) {
           if (discord_user?.avatar) {
             const isAnimated = discord_user.avatar.startsWith("a_");
             setAvatarUrl(
-              `https://cdn.discordapp.com/avatars/${member.discordId}/${discord_user.avatar}.${isAnimated ? "gif" : "png"}?size=256`
+              `https://cdn.discordapp.com/avatars/${member.discordId}/${discord_user.avatar}.${isAnimated ? "gif" : "png"}?size=256`,
             );
           }
           if (discord_status) {
@@ -113,7 +115,9 @@ function MemberCard({ member }: { member: TeamMember }) {
 
           {/* Discord Presence Indicator */}
           {presenceStatus && (
-            <span className={`absolute bottom-1 right-1 flex h-4 w-4 rounded-full ring-4 ring-surface ${getStatusColor()}`} />
+            <span
+              className={`absolute bottom-1 right-1 flex h-4 w-4 rounded-full ring-4 ring-surface ${getStatusColor()}`}
+            />
           )}
         </div>
 
@@ -126,9 +130,7 @@ function MemberCard({ member }: { member: TeamMember }) {
         </p>
 
         {/* Bio */}
-        <p className="mt-4 text-sm leading-relaxed text-white/70">
-          {member.bio}
-        </p>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">{member.bio}</p>
 
         {/* Action Links */}
         <div className="mt-6 flex items-center gap-4">

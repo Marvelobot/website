@@ -46,7 +46,9 @@ export function Navbar() {
             <a
               href="#cta"
               className={`inline-flex items-center rounded-full bg-gradient-hero px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-500 ${
-                scrolled ? "opacity-100 translate-y-0" : "pointer-events-none -translate-y-2 opacity-0"
+                scrolled
+                  ? "opacity-100 translate-y-0"
+                  : "pointer-events-none -translate-y-2 opacity-0"
               }`}
             >
               Add to Discord
@@ -79,7 +81,11 @@ export function Navbar() {
         >
           <div className="flex items-center justify-between">
             <span className="font-display tracking-[0.25em] text-white">MARVELO</span>
-            <button aria-label="Close menu" onClick={() => setOpen(false)} className="text-white/80">
+            <button
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="text-white/80"
+            >
               <CloseIcon className="h-6 w-6" />
             </button>
           </div>

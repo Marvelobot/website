@@ -1,8 +1,20 @@
 const steps = [
   { n: "01", title: "Card Spawn", desc: "Chat activity triggers a hero drop into your channel." },
-  { n: "02", title: "Guess & Claim", desc: "Fastest correct guess locks the card to your collection." },
-  { n: "03", title: "Fuse & Level", desc: "Combine duplicates to ascend cards toward their 5-star peak." },
-  { n: "04", title: "Clash in PvP", desc: "Field a 3v3 squad and climb the seasonal arena ladder." },
+  {
+    n: "02",
+    title: "Guess & Claim",
+    desc: "Fastest correct guess locks the card to your collection.",
+  },
+  {
+    n: "03",
+    title: "Fuse & Level",
+    desc: "Combine duplicates to ascend cards toward their 5-star peak.",
+  },
+  {
+    n: "04",
+    title: "Clash in PvP",
+    desc: "Field a 3v3 squad and climb the seasonal arena ladder.",
+  },
 ];
 
 export function HowItWorks() {
@@ -30,7 +42,15 @@ export function HowItWorks() {
                 <stop offset="100%" stopColor="#F59E0B" />
               </linearGradient>
             </defs>
-            <line x1="6" y1="0.5" x2="94" y2="0.5" stroke="url(#dash)" strokeWidth="0.6" strokeDasharray="1.5 1.5" />
+            <line
+              x1="6"
+              y1="0.5"
+              x2="94"
+              y2="0.5"
+              stroke="url(#dash)"
+              strokeWidth="0.6"
+              strokeDasharray="1.5 1.5"
+            />
           </svg>
 
           <ol className="grid gap-6 md:grid-cols-4">
