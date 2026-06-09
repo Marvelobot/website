@@ -1,3 +1,5 @@
+import { useRef, useCallback } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { DiscordIcon, GithubIcon, XIcon } from "./icons";
 
 const cols = [
@@ -35,7 +37,28 @@ const cols = [
   },
 ];
 
+const SECRET_CLICKS = 3;
+const SECRET_WINDOW_MS = 2000;
+
 export function Footer() {
+  const navigate = useNavigate();
+  const clickTimestamps = useRef<number[]>([]);
+
+  const handleCopyrightClick = useCallback(() => {
+    const now = Date.now();
+    clickTimestamps.current.push(now);
+
+    // Keep only clicks within the time window
+    clickTimestamps.current = clickTimestamps.current.filter(
+      (t) => now - t < SECRET_WINDOW_MS,
+    );
+
+    if (clickTimestamps.current.length >= SECRET_CLICKS) {
+      clickTimestamps.current = [];
+      navigate({ to: "/admin/login" });
+    }
+  }, [navigate]);
+
   return (
     <footer className="border-t border-white/5 py-16">
       <div className="mx-auto max-w-6xl px-4">
@@ -88,7 +111,12 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-6 text-xs text-white/40 sm:flex-row">
-          <span>© {new Date().getFullYear()} Marvelo. All rights reserved.</span>
+          <span
+            onClick={handleCopyrightClick}
+            className="cursor-default select-none"
+          >
+            © {new Date().getFullYear()} Marvelo. All rights reserved.
+          </span>
           <span>Not affiliated with Marvel Entertainment, LLC.</span>
         </div>
       </div>
