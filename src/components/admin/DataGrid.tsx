@@ -50,7 +50,9 @@ function deriveColumns(rows: Record<string, unknown>[], primaryKey: string): str
   const dataObj = firstRow.data;
   const hasDataCol = dataObj !== null && typeof dataObj === "object" && !Array.isArray(dataObj);
 
-  const topKeys = Object.keys(firstRow).filter((k) => k !== primaryKey && k !== "data");
+  const topKeys = Object.keys(firstRow).filter(
+    (k) => k !== primaryKey && k !== "data" && k !== "_pk",
+  );
 
   const dataKeys = hasDataCol ? Object.keys(dataObj as Record<string, unknown>).slice(0, 8) : [];
 
@@ -58,11 +60,14 @@ function deriveColumns(rows: Record<string, unknown>[], primaryKey: string): str
   return [primaryKey, ...topKeys, ...dataKeys.map((k) => `data.${k}`)];
 }
 
-function getCellValue(row: Record<string, unknown>, col: string): unknown {
+function getCellValue(row: Record<string, unknown>, col: string, primaryKey?: string): unknown {
   if (col.startsWith("data.")) {
     const key = col.slice(5);
     const data = row.data as Record<string, unknown> | undefined;
     return data?.[key];
+  }
+  if (col === "_pk" || col === primaryKey) {
+    return row._pk ?? row[col];
   }
   return row[col];
 }
@@ -137,9 +142,11 @@ export function DataGrid({
   // Live validation for JSON complex fields
   useEffect(() => {
     if (!editingCell) return;
-    const targetRow = rows.find((r) => r[primaryKey] === editingCell.rowPk);
+    const targetRow = rows.find(
+      (r) => r._pk === editingCell.rowPk || r[primaryKey] === editingCell.rowPk,
+    );
     if (!targetRow) return;
-    const currentVal = getCellValue(targetRow, editingCell.field);
+    const currentVal = getCellValue(targetRow, editingCell.field, primaryKey);
     if (isComplexValue(currentVal)) {
       try {
         JSON.parse(editValue);
@@ -295,7 +302,7 @@ export function DataGrid({
               </TableRow>
             ) : (
               rows.map((row, idx) => {
-                const rowId = row[primaryKey] as string | number;
+                const rowId = (row._pk ?? row[primaryKey]) as string | number;
                 const isSelected = rowId === selectedRowId;
                 return (
                   <TableRow
@@ -311,7 +318,7 @@ export function DataGrid({
                     onClick={() => onSelectRow(row)}
                   >
                     {columns.map((col) => {
-                      const cellVal = getCellValue(row, col);
+                      const cellVal = getCellValue(row, col, primaryKey);
                       const display = renderCellContent(cellVal);
                       const isPk = col === primaryKey;
                       const isEditingThis =

@@ -268,7 +268,7 @@ function AdminDashboard() {
 
   const handleDeleteRow = async () => {
     if (!activeTable || !selectedRow || !tableSchema) return;
-    const id = selectedRow[tableSchema.primaryKey];
+    const id = selectedRow._pk ?? selectedRow[tableSchema.primaryKey];
     if (!id) return;
 
     try {
@@ -309,7 +309,9 @@ function AdminDashboard() {
   };
 
   const primaryKey = tableSchema?.primaryKey ?? "id";
-  const selectedRowId = selectedRow ? (selectedRow[primaryKey] as string | number) : null;
+  const selectedRowId = selectedRow
+    ? ((selectedRow._pk ?? selectedRow[primaryKey]) as string | number)
+    : null;
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
