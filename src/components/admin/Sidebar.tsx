@@ -3,12 +3,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Shield,
   Database,
@@ -22,6 +17,7 @@ import {
   ScrollText,
   PanelLeftClose,
   PanelLeft,
+  Terminal,
 } from "lucide-react";
 import type { TableInfo } from "@/lib/api/admin.functions";
 
@@ -34,6 +30,8 @@ interface SidebarProps {
   onSync: () => void;
   onLogout: () => void;
   syncing?: boolean;
+  activeView?: "tables" | "access-log";
+  onViewChange?: (view: "tables" | "access-log") => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -45,6 +43,8 @@ export function AdminSidebar({
   onSync,
   onLogout,
   syncing = false,
+  activeView = "tables",
+  onViewChange,
 }: SidebarProps) {
   const [pgExpanded, setPgExpanded] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
@@ -96,6 +96,23 @@ export function AdminSidebar({
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right">System Logs</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onViewChange?.("access-log")}
+                  className={cn(
+                    "p-2 rounded-md transition-colors",
+                    activeView === "access-log"
+                      ? "text-[#e8866b] bg-[#e8866b]/[0.12]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                  )}
+                >
+                  <Terminal className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Terminal Access Log</TooltipContent>
             </Tooltip>
           </div>
 
@@ -204,10 +221,13 @@ export function AdminSidebar({
               {tables.map((t) => (
                 <button
                   key={t.name}
-                  onClick={() => onSelectTable(t.name)}
+                  onClick={() => {
+                    onSelectTable(t.name);
+                    onViewChange?.("tables");
+                  }}
                   className={cn(
                     "flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs transition-all duration-150",
-                    activeTable === t.name
+                    activeView === "tables" && activeTable === t.name
                       ? "bg-[#e8866b]/[0.12] text-[#e8866b] font-medium border border-[#e8866b]/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
                   )}
@@ -220,7 +240,7 @@ export function AdminSidebar({
                     variant="secondary"
                     className={cn(
                       "h-5 min-w-[28px] justify-center px-1.5 text-[10px] font-mono",
-                      activeTable === t.name
+                      activeView === "tables" && activeTable === t.name
                         ? "bg-[#e8866b]/20 text-[#e8866b] border-[#e8866b]/30"
                         : "bg-white/[0.06] text-muted-foreground",
                     )}
@@ -243,6 +263,22 @@ export function AdminSidebar({
           <button className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors">
             <ScrollText className="h-3.5 w-3.5" />
             <span className="font-medium">System Logs</span>
+          </button>
+        </div>
+
+        {/* Terminal Access Log */}
+        <div className="mb-1">
+          <button
+            onClick={() => onViewChange?.("access-log")}
+            className={cn(
+              "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs transition-colors",
+              activeView === "access-log"
+                ? "bg-[#e8866b]/[0.12] text-[#e8866b] font-medium border border-[#e8866b]/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+            )}
+          >
+            <Terminal className="h-3.5 w-3.5" />
+            <span className="font-medium">Terminal Access Log</span>
           </button>
         </div>
       </ScrollArea>

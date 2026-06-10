@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -35,6 +35,8 @@ export interface DataGridProps {
   total: number;
   onPageChange: (page: number) => void;
   loading?: boolean;
+  onCellEdit?: (rowPk: string | number, field: string, newValue: unknown) => void;
+  onEditingChange?: (editing: boolean) => void;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -46,25 +48,17 @@ function deriveColumns(rows: Record<string, unknown>[], primaryKey: string): str
   const firstRow = rows[0];
   // If there's a `data` column that's an object, flatten its top-level keys
   const dataObj = firstRow.data;
-  const hasDataCol =
-    dataObj !== null && typeof dataObj === "object" && !Array.isArray(dataObj);
+  const hasDataCol = dataObj !== null && typeof dataObj === "object" && !Array.isArray(dataObj);
 
-  const topKeys = Object.keys(firstRow).filter(
-    (k) => k !== primaryKey && k !== "data",
-  );
+  const topKeys = Object.keys(firstRow).filter((k) => k !== primaryKey && k !== "data");
 
-  const dataKeys = hasDataCol
-    ? Object.keys(dataObj as Record<string, unknown>).slice(0, 8)
-    : [];
+  const dataKeys = hasDataCol ? Object.keys(dataObj as Record<string, unknown>).slice(0, 8) : [];
 
   // primary key first, then direct cols, then flattened data cols
   return [primaryKey, ...topKeys, ...dataKeys.map((k) => `data.${k}`)];
 }
 
-function getCellValue(
-  row: Record<string, unknown>,
-  col: string,
-): unknown {
+function getCellValue(row: Record<string, unknown>, col: string): unknown {
   if (col.startsWith("data.")) {
     const key = col.slice(5);
     const data = row.data as Record<string, unknown> | undefined;
@@ -105,8 +99,119 @@ export function DataGrid({
   total,
   onPageChange,
   loading = false,
+  onCellEdit,
+  onEditingChange,
 }: DataGridProps) {
   const columns = useMemo(() => deriveColumns(rows, primaryKey), [rows, primaryKey]);
+
+  // ── Inline Editing State ───────────────────────────────────────────────────
+  const [editingCell, setEditingCell] = useState<{ rowPk: string | number; field: string } | null>(
+    null,
+  );
+  const [editValue, setEditValue] = useState<string>("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Helper to determine if value is object or array
+  const isComplexValue = (val: unknown): boolean => {
+    return val !== null && typeof val === "object";
+  };
+
+  // Double click cell to enter edit mode
+  const handleDoubleClick = (rowPk: string | number, field: string, currentVal: unknown) => {
+    if (field === primaryKey) return;
+    setEditingCell({ rowPk, field });
+    setEditValue(
+      currentVal === null || currentVal === undefined
+        ? ""
+        : typeof currentVal === "object"
+          ? JSON.stringify(currentVal, null, 2)
+          : String(currentVal),
+    );
+    setJsonError(null);
+    onEditingChange?.(true);
+  };
+
+  // Live validation for JSON complex fields
+  useEffect(() => {
+    if (!editingCell) return;
+    const targetRow = rows.find((r) => r[primaryKey] === editingCell.rowPk);
+    if (!targetRow) return;
+    const currentVal = getCellValue(targetRow, editingCell.field);
+    if (isComplexValue(currentVal)) {
+      try {
+        JSON.parse(editValue);
+        setJsonError(null);
+      } catch (err) {
+        setJsonError("Invalid JSON");
+      }
+    } else {
+      setJsonError(null);
+    }
+  }, [editValue, editingCell, rows, primaryKey]);
+
+  // Template inserter for JSON array/object chips
+  const insertTemplate = (template: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setEditValue(template);
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    const newValue = before + template + after;
+    setEditValue(newValue);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + template.length, start + template.length);
+    }, 0);
+  };
+
+  // Save the edited cell
+  const handleSave = (rowPk: string | number, field: string, originalVal: unknown) => {
+    let parsedValue: unknown = editValue;
+
+    if (isComplexValue(originalVal)) {
+      try {
+        parsedValue = JSON.parse(editValue);
+      } catch (err) {
+        setJsonError("Invalid JSON format");
+        return;
+      }
+    } else {
+      const trimmed = editValue.trim();
+      if (
+        (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+        (trimmed.startsWith("{") && trimmed.endsWith("}"))
+      ) {
+        try {
+          parsedValue = JSON.parse(trimmed);
+        } catch (err) {
+          setJsonError("Invalid JSON format");
+          return;
+        }
+      } else if (trimmed === "true") {
+        parsedValue = true;
+      } else if (trimmed === "false") {
+        parsedValue = false;
+      } else if (trimmed === "" || trimmed === "null") {
+        parsedValue = null;
+      } else if (!isNaN(Number(trimmed)) && trimmed !== "") {
+        parsedValue = Number(trimmed);
+      } else {
+        parsedValue = editValue;
+      }
+    }
+
+    onCellEdit?.(rowPk, field, parsedValue);
+    setEditingCell(null);
+    onEditingChange?.(false);
+  };
 
   const SortIcon = ({ col }: { col: string }) => {
     if (sortField !== col) return <ArrowUpDown className="h-3 w-3 opacity-40" />;
@@ -173,7 +278,10 @@ export function DataGrid({
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   No records found.
                 </TableCell>
               </TableRow>
@@ -198,16 +306,133 @@ export function DataGrid({
                       const cellVal = getCellValue(row, col);
                       const display = renderCellContent(cellVal);
                       const isPk = col === primaryKey;
+                      const isEditingThis =
+                        editingCell && editingCell.rowPk === rowId && editingCell.field === col;
+
+                      if (isEditingThis) {
+                        const isComplex = isComplexValue(cellVal);
+                        return (
+                          <TableCell
+                            key={col}
+                            className="p-1 min-w-[220px]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {isComplex ? (
+                              <div className="flex flex-col gap-1 rounded-md border border-[#e8866b] bg-[#060609] p-1.5 shadow-[0_0_10px_rgba(232,134,107,0.15)]">
+                                <div className="flex items-center justify-between text-[9px] text-muted-foreground pb-1 border-b border-white/[0.04] mb-1 select-none">
+                                  <span className="font-semibold uppercase tracking-wider">
+                                    Templates:
+                                  </span>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => insertTemplate('["value1", "value2"]')}
+                                      className="px-1.5 py-0.5 rounded bg-white/[0.04] hover:bg-[#e8866b]/20 hover:text-[#e8866b] transition-colors font-mono"
+                                    >
+                                      [Array]
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => insertTemplate('{"key": "value"}')}
+                                      className="px-1.5 py-0.5 rounded bg-white/[0.04] hover:bg-[#e8866b]/20 hover:text-[#e8866b] transition-colors font-mono"
+                                    >
+                                      {`{Object}`}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => insertTemplate('[{"id": 1, "name": "val"}]')}
+                                      className="px-1.5 py-0.5 rounded bg-white/[0.04] hover:bg-[#e8866b]/20 hover:text-[#e8866b] transition-colors font-mono"
+                                    >
+                                      [JSON List]
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <textarea
+                                  ref={textareaRef}
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      setEditingCell(null);
+                                      onEditingChange?.(false);
+                                    } else if (e.key === "Enter" && e.ctrlKey) {
+                                      handleSave(rowId, col, cellVal);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full min-h-[70px] bg-white/[0.02] border border-white/[0.08] rounded p-1 text-[11px] font-mono text-foreground focus:outline-none focus:border-[#e8866b]/50 resize-y",
+                                    jsonError && "border-red-500/50 focus:border-red-500",
+                                  )}
+                                  placeholder="Enter JSON..."
+                                  autoFocus
+                                />
+
+                                {jsonError && (
+                                  <span className="text-[10px] text-red-400 font-medium">
+                                    {jsonError}
+                                  </span>
+                                )}
+
+                                <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/[0.04]">
+                                  <span className="text-[9px] text-muted-foreground/60">
+                                    Ctrl+Enter to save
+                                  </span>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() => {
+                                        setEditingCell(null);
+                                        onEditingChange?.(false);
+                                      }}
+                                      className="px-2 py-0.5 rounded text-[10px] text-muted-foreground hover:bg-white/[0.04] transition-colors"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => handleSave(rowId, col, cellVal)}
+                                      disabled={!!jsonError}
+                                      className="px-2 py-0.5 rounded text-[10px] bg-[#e8866b] text-white hover:brightness-110 transition-colors disabled:opacity-50"
+                                    >
+                                      Save
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="relative flex items-center rounded-md border border-[#e8866b] bg-[#060609] p-0.5 shadow-[0_0_10px_rgba(232,134,107,0.15)]">
+                                <input
+                                  type="text"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      setEditingCell(null);
+                                      onEditingChange?.(false);
+                                    } else if (e.key === "Enter") {
+                                      handleSave(rowId, col, cellVal);
+                                    }
+                                  }}
+                                  onBlur={() => handleSave(rowId, col, cellVal)}
+                                  className="w-full bg-transparent border-0 px-2 py-1 text-xs font-mono focus:outline-none focus:ring-0 text-foreground"
+                                  autoFocus
+                                />
+                              </div>
+                            )}
+                          </TableCell>
+                        );
+                      }
+
                       return (
                         <TableCell
                           key={col}
                           className={cn(
-                            "whitespace-nowrap text-xs max-w-[240px] truncate",
+                            "whitespace-nowrap text-xs max-w-[240px] truncate select-none",
                             isPk
                               ? "font-mono font-semibold text-[#e8866b]"
-                              : "text-foreground/80",
+                              : "text-foreground/80 hover:bg-[#e8866b]/[0.03] transition-colors cursor-pointer",
                           )}
                           title={typeof cellVal === "string" ? cellVal : display}
+                          onDoubleClick={() => handleDoubleClick(rowId, col, cellVal)}
                         >
                           {display}
                         </TableCell>

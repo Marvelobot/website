@@ -19,11 +19,11 @@ interface JsonNodeProps {
 // ── Syntax color tokens ────────────────────────────────────────────────────────
 
 const tokenColor = {
-  key: "text-[#e8866b]",          // coral / salmon
-  string: "text-[#7ec87e]",       // green
-  number: "text-[#e5c07b]",       // gold
-  boolean: "text-[#56d4dd]",      // cyan
-  null: "text-[#868ba5]",         // muted
+  key: "text-[#e8866b]", // coral / salmon
+  string: "text-[#7ec87e]", // green
+  number: "text-[#e5c07b]", // gold
+  boolean: "text-[#56d4dd]", // cyan
+  null: "text-[#868ba5]", // muted
   bracket: "text-muted-foreground",
   comma: "text-muted-foreground/60",
 } as const;
@@ -163,7 +163,11 @@ export function JsonViewer({ data, className }: JsonViewerProps) {
         className="absolute top-2 right-2 p-1.5 rounded-md bg-white/[0.04] border border-white/[0.08] text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors"
         title="Copy JSON"
       >
-        {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-green-400" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
       </button>
 
       {/* Tree */}

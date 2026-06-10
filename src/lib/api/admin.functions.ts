@@ -58,10 +58,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
 
-export async function adminLogin(
-  username: string,
-  password: string,
-): Promise<LoginResponse> {
+export async function adminLogin(username: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -104,10 +101,9 @@ export async function fetchTableData(
     params.set("sortDirection", sortDirection);
   }
 
-  const res = await fetch(
-    `${API_BASE}/api/tables/${tableName}?${params}`,
-    { headers: authHeaders() },
-  );
+  const res = await fetch(`${API_BASE}/api/tables/${tableName}?${params}`, {
+    headers: authHeaders(),
+  });
 
   // This endpoint returns { success, data: [...rows], meta: { total, page, limit, totalPages } }
   const body = await res.json().catch(() => ({ success: false, error: res.statusText }));
@@ -149,4 +145,89 @@ export async function deleteRow(
     headers: authHeaders(),
   });
   return handleResponse<{ deleted: string }>(res);
+}
+
+// ── Single Row ─────────────────────────────────────────────────────────────────
+
+export async function fetchSingleRow(
+  tableName: string,
+  id: string | number,
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/api/tables/${tableName}/${id}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<Record<string, unknown>>(res);
+}
+
+// ── Session Keep-Alive ─────────────────────────────────────────────────────────
+
+export async function pingSession(): Promise<void> {
+  await fetch(`${API_BASE}/api/auth/ping`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+}
+
+export async function logoutSession(): Promise<void> {
+  await fetch(`${API_BASE}/api/auth/logout`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+}
+
+// ── Access Logs ────────────────────────────────────────────────────────────────
+
+export interface AccessLogSession {
+  session_id: string;
+  username: string;
+  login_time: string;
+  last_active: string;
+  logout_time: string | null;
+  ip_address: string;
+  user_agent: string;
+  changes_count: number;
+}
+
+export async function fetchAccessLogs(
+  page: number = 1,
+  limit: number = 25,
+): Promise<{ sessions: AccessLogSession[]; total: number; page: number; totalPages: number }> {
+  const res = await fetch(`${API_BASE}/api/admin/access-logs?page=${page}&limit=${limit}`, {
+    headers: authHeaders(),
+  });
+  const body = await res.json().catch(() => ({ success: false, error: res.statusText }));
+  if (!res.ok) {
+    throw new Error(body.error || body.message || `Request failed (${res.status})`);
+  }
+  return {
+    sessions: body.data || [],
+    total: body.meta?.total || 0,
+    page: body.meta?.page || page,
+    totalPages: body.meta?.totalPages || 1,
+  };
+}
+
+// Fetch session details with audit changes
+export interface AuditChange {
+  log_id: string;
+  session_id: string;
+  username: string;
+  table_name: string;
+  row_id: string;
+  action: string;
+  old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
+  timestamp: string;
+}
+
+export interface SessionDetails {
+  session: AccessLogSession;
+  changes: AuditChange[];
+}
+
+export async function fetchSessionDetails(sessionId: string): Promise<SessionDetails> {
+  const res = await fetch(`${API_BASE}/api/admin/access-logs/${sessionId}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<SessionDetails>(res);
 }

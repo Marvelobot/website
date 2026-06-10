@@ -49,9 +49,7 @@ export function Footer() {
     clickTimestamps.current.push(now);
 
     // Keep only clicks within the time window
-    clickTimestamps.current = clickTimestamps.current.filter(
-      (t) => now - t < SECRET_WINDOW_MS,
-    );
+    clickTimestamps.current = clickTimestamps.current.filter((t) => now - t < SECRET_WINDOW_MS);
 
     if (clickTimestamps.current.length >= SECRET_CLICKS) {
       clickTimestamps.current = [];
@@ -111,10 +109,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-6 text-xs text-white/40 sm:flex-row">
-          <span
-            onClick={handleCopyrightClick}
-            className="cursor-default select-none"
-          >
+          <span onClick={handleCopyrightClick} className="cursor-default select-none">
             © {new Date().getFullYear()} Marvelo. All rights reserved.
           </span>
           <span>Not affiliated with Marvel Entertainment, LLC.</span>
