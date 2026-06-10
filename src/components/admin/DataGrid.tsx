@@ -112,6 +112,7 @@ export function DataGrid({
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isSavingRef = useRef<boolean>(false);
 
   // Helper to determine if value is object or array
   const isComplexValue = (val: unknown): boolean => {
@@ -174,6 +175,9 @@ export function DataGrid({
 
   // Save the edited cell
   const handleSave = (rowPk: string | number, field: string, originalVal: unknown) => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+
     let parsedValue: unknown = editValue;
 
     if (isComplexValue(originalVal)) {
@@ -211,6 +215,10 @@ export function DataGrid({
     onCellEdit?.(rowPk, field, parsedValue);
     setEditingCell(null);
     onEditingChange?.(false);
+
+    setTimeout(() => {
+      isSavingRef.current = false;
+    }, 150);
   };
 
   const SortIcon = ({ col }: { col: string }) => {
@@ -354,8 +362,12 @@ export function DataGrid({
                                   onChange={(e) => setEditValue(e.target.value)}
                                   onKeyDown={(e) => {
                                     if (e.key === "Escape") {
+                                      isSavingRef.current = true;
                                       setEditingCell(null);
                                       onEditingChange?.(false);
+                                      setTimeout(() => {
+                                        isSavingRef.current = false;
+                                      }, 150);
                                     } else if (e.key === "Enter" && e.ctrlKey) {
                                       handleSave(rowId, col, cellVal);
                                     }
@@ -381,8 +393,12 @@ export function DataGrid({
                                   <div className="flex gap-1.5">
                                     <button
                                       onClick={() => {
+                                        isSavingRef.current = true;
                                         setEditingCell(null);
                                         onEditingChange?.(false);
+                                        setTimeout(() => {
+                                          isSavingRef.current = false;
+                                        }, 150);
                                       }}
                                       className="px-2 py-0.5 rounded text-[10px] text-muted-foreground hover:bg-white/[0.04] transition-colors"
                                     >
@@ -406,13 +422,21 @@ export function DataGrid({
                                   onChange={(e) => setEditValue(e.target.value)}
                                   onKeyDown={(e) => {
                                     if (e.key === "Escape") {
+                                      isSavingRef.current = true;
                                       setEditingCell(null);
                                       onEditingChange?.(false);
+                                      setTimeout(() => {
+                                        isSavingRef.current = false;
+                                      }, 150);
                                     } else if (e.key === "Enter") {
                                       handleSave(rowId, col, cellVal);
                                     }
                                   }}
-                                  onBlur={() => handleSave(rowId, col, cellVal)}
+                                  onBlur={() => {
+                                    if (!isSavingRef.current) {
+                                      handleSave(rowId, col, cellVal);
+                                    }
+                                  }}
                                   className="w-full bg-transparent border-0 px-2 py-1 text-xs font-mono focus:outline-none focus:ring-0 text-foreground"
                                   autoFocus
                                 />
