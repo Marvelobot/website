@@ -70,13 +70,11 @@ export async function adminLogin(
   return handleResponse<LoginResponse>(res);
 }
 
-// ── Tables ─────────────────────────────────────────────────────────────────────
-
-export async function fetchTables(): Promise<string[]> {
+export async function fetchTables(): Promise<TableInfo[]> {
   const res = await fetch(`${API_BASE}/api/tables`, {
     headers: authHeaders(),
   });
-  return handleResponse<string[]>(res);
+  return handleResponse<TableInfo[]>(res);
 }
 
 export async function fetchTableSchema(tableName: string): Promise<TableSchema> {
