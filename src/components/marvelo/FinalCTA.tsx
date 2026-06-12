@@ -21,13 +21,17 @@ export function FinalCTA() {
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
             <a
-              href="#"
+              href="https://discord.com/oauth2/authorize?client_id=1503693785882693642&permissions=330816&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-full bg-gradient-hero px-8 py-3.5 text-sm font-semibold text-white animate-pulse-glow"
             >
               Add to Discord
             </a>
             <a
-              href="#"
+              href="https://discord.gg/uFhfGjaGW9"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.04] px-8 py-3.5 text-sm font-medium text-white/90 backdrop-blur transition-colors hover:bg-white/[0.08]"
             >
               Join Our Server

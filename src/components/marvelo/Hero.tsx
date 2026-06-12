@@ -56,7 +56,9 @@ export function Hero() {
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
-              href="#cta"
+              href="https://discord.com/oauth2/authorize?client_id=1503693785882693642&permissions=330816&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
               className="relative inline-flex items-center justify-center rounded-full bg-gradient-hero px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(220,38,38,0.7)] animate-pulse-glow"
             >
               Add to Discord

@@ -44,7 +44,9 @@ export function Navbar() {
 
           <div className="hidden md:block">
             <a
-              href="#cta"
+              href="https://discord.com/oauth2/authorize?client_id=1503693785882693642&permissions=330816&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
               className={`inline-flex items-center rounded-full bg-gradient-hero px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-500 ${
                 scrolled
                   ? "opacity-100 translate-y-0"
@@ -103,7 +105,9 @@ export function Navbar() {
             ))}
           </ul>
           <a
-            href="#cta"
+            href="https://discord.com/oauth2/authorize?client_id=1503693785882693642&permissions=330816&integration_type=0&scope=bot+applications.commands"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => setOpen(false)}
             className="mt-6 block rounded-full bg-gradient-hero px-4 py-3 text-center text-sm font-semibold text-white"
           >

@@ -22,9 +22,9 @@ const cols = [
   {
     title: "Community",
     links: [
-      ["Discord Server", "#"],
+      ["Discord Server", "https://discord.gg/uFhfGjaGW9"],
       ["Guild Directory", "#"],
-      ["Support", "#"],
+      ["Support", "https://discord.gg/uFhfGjaGW9"],
     ],
   },
   {
@@ -71,13 +71,15 @@ export function Footer() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               {[
-                { Icon: DiscordIcon, label: "Discord" },
-                { Icon: GithubIcon, label: "GitHub" },
-                { Icon: XIcon, label: "X" },
-              ].map(({ Icon, label }) => (
+                { Icon: DiscordIcon, label: "Discord", url: "https://discord.gg/uFhfGjaGW9" },
+                { Icon: GithubIcon, label: "GitHub", url: "#" },
+                { Icon: XIcon, label: "X", url: "#" },
+              ].map(({ Icon, label, url }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={url}
+                  target={url.startsWith("http") ? "_blank" : undefined}
+                  rel={url.startsWith("http") ? "noopener noreferrer" : undefined}
                   aria-label={label}
                   className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
                 >
@@ -97,6 +99,8 @@ export function Footer() {
                   <li key={label}>
                     <a
                       href={href}
+                      target={href.startsWith("http") ? "_blank" : undefined}
+                      rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
                       className="text-sm text-white/55 transition-colors hover:text-white"
                     >
                       {label}
