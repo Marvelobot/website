@@ -1,4 +1,40 @@
+import { useEffect, useState } from "react";
 import { CardMockup } from "./CardMockup";
+
+function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let raf = 0;
+    const duration = 1600; // Animation duration in milliseconds
+    const start = performance.now();
+
+    const tick = (t: number) => {
+      const elapsed = t - start;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function: easeOutQuad
+      const ease = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(value * ease));
+
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+
+  const display = value >= 1000 ? count.toLocaleString() : count.toString();
+
+  return (
+    <>
+      {display}
+      <span className="text-gradient-hero">{suffix}</span>
+    </>
+  );
+}
 
 export function Hero() {
   return (
@@ -35,13 +71,15 @@ export function Hero() {
 
           <div className="mt-12 grid max-w-md grid-cols-3 gap-6 text-left">
             {[
-              ["500+", "Unique Cards"],
-              ["3,000+", "Active Players"],
-              ["50+", "Guild Servers"],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="font-display text-2xl font-bold text-white">{n}</div>
-                <div className="mt-1 text-xs uppercase tracking-wider text-white/50">{l}</div>
+              { value: 500, suffix: "+", label: "Unique Cards" },
+              { value: 3000, suffix: "+", label: "Active Players" },
+              { value: 50, suffix: "+", label: "Guild Servers" },
+            ].map(({ value, suffix, label }) => (
+              <div key={label}>
+                <div className="font-display text-2xl font-bold text-white">
+                  <AnimatedNumber value={value} suffix={suffix} />
+                </div>
+                <div className="mt-1 text-xs uppercase tracking-wider text-white/50">{label}</div>
               </div>
             ))}
           </div>
