@@ -30,9 +30,9 @@ const cols = [
   {
     title: "Legal",
     links: [
-      ["Terms", "#"],
-      ["Privacy", "#"],
-      ["Fair Play", "#"],
+      ["Terms", "/terms"],
+      ["Privacy", "/privacy"],
+      ["Disclaimer", "/disclaimer"],
     ],
   },
 ];
