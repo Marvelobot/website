@@ -231,3 +231,102 @@ export async function fetchSessionDetails(sessionId: string): Promise<SessionDet
   });
   return handleResponse<SessionDetails>(res);
 }
+
+// ── Bot Analytics ─────────────────────────────────────────────────────────────
+
+export interface AnalyticsCounts {
+  totalUsers: number;
+  totalCards: number;
+  totalTrades: number;
+  totalMarket: number;
+  totalHighRarityDrops: number;
+}
+
+export interface DayCount {
+  date: string;
+  count: number;
+}
+
+export interface PopularCommand {
+  command_name: string;
+  count: number;
+}
+
+export interface AnalyticsOverview {
+  counts: AnalyticsCounts;
+  dau: DayCount[];
+  dailyCommands: DayCount[];
+  dailyRegistrations: DayCount[];
+  popularCommands: PopularCommand[];
+}
+
+export interface HighRarityDrop {
+  id: string;
+  user_id: string;
+  card_id: string;
+  character_name: string;
+  rarity: string;
+  source: string;
+  timestamp: string;
+}
+
+export interface BotUserAction {
+  id: string;
+  user_id: string;
+  command_name: string;
+  affected_table: string;
+  action_type: string;
+  details: Record<string, unknown>;
+  timestamp: string;
+}
+
+export interface BotLogsResponse {
+  data: BotUserAction[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export async function fetchAnalyticsOverview(): Promise<AnalyticsOverview> {
+  const res = await fetch(`${API_BASE}/api/admin/analytics/overview`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<AnalyticsOverview>(res);
+}
+
+export async function fetchHighRarityDrops(limit = 20): Promise<HighRarityDrop[]> {
+  const res = await fetch(`${API_BASE}/api/admin/analytics/drops?limit=${limit}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<HighRarityDrop[]>(res);
+}
+
+export async function fetchBotLogs(page = 1, limit = 20, search = ""): Promise<BotLogsResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search) params.set("search", search);
+
+  const res = await fetch(`${API_BASE}/api/admin/analytics/logs?${params}`, {
+    headers: authHeaders(),
+  });
+  
+  const body = await res.json().catch(() => ({ success: false, error: res.statusText }));
+  if (!res.ok) {
+    throw new Error(body.error || body.message || `Request failed (${res.status})`);
+  }
+  
+  return {
+    data: body.data || [],
+    meta: {
+      total: body.meta?.total || 0,
+      page: body.meta?.page || page,
+      limit: body.meta?.limit || limit,
+      totalPages: body.meta?.totalPages || 1,
+    }
+  };
+}

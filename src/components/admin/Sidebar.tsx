@@ -30,8 +30,8 @@ interface SidebarProps {
   onSync: () => void;
   onLogout: () => void;
   syncing?: boolean;
-  activeView?: "tables" | "access-log";
-  onViewChange?: (view: "tables" | "access-log") => void;
+  activeView?: "tables" | "access-log" | "analytics";
+  onViewChange?: (view: "tables" | "access-log" | "analytics") => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -70,7 +70,15 @@ export function AdminSidebar({
           <div className="flex flex-1 flex-col items-center gap-1 pt-3">
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors">
+                <button
+                  onClick={() => onViewChange?.("analytics")}
+                  className={cn(
+                    "p-2 rounded-md transition-colors",
+                    activeView === "analytics"
+                      ? "text-[#e8866b] bg-[#e8866b]/[0.12]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                  )}
+                >
                   <LayoutDashboard className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
@@ -194,7 +202,15 @@ export function AdminSidebar({
       <ScrollArea className="flex-1 px-2 py-2">
         {/* Dashboard */}
         <div className="mb-1">
-          <button className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors">
+          <button
+            onClick={() => onViewChange?.("analytics")}
+            className={cn(
+              "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs transition-colors",
+              activeView === "analytics"
+                ? "bg-[#e8866b]/[0.12] text-[#e8866b] font-medium border border-[#e8866b]/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+            )}
+          >
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="font-medium">Dashboard</span>
           </button>

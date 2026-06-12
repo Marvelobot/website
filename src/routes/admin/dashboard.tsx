@@ -26,6 +26,7 @@ import { AdminSidebar } from "@/components/admin/Sidebar";
 import { DataGrid } from "@/components/admin/DataGrid";
 import { JsonViewer } from "@/components/admin/JsonViewer";
 import { AccessLogView } from "@/components/admin/AccessLogView";
+import { AnalyticsView } from "@/components/admin/AnalyticsView";
 import {
   Dialog,
   DialogContent,
@@ -95,7 +96,7 @@ function AdminDashboard() {
 
   const [selectedRow, setSelectedRow] = useState<Record<string, unknown> | null>(null);
 
-  const [activeView, setActiveView] = useState<"tables" | "access-log">("tables");
+  const [activeView, setActiveView] = useState<"tables" | "access-log" | "analytics">("analytics");
   const [isEditing, setIsEditing] = useState(false);
   const [conflict, setConflict] = useState<{
     rowPk: string | number;
@@ -196,6 +197,7 @@ function AdminDashboard() {
     setSortField("");
     setSortDirection("asc");
     setSelectedRow(null);
+    setActiveView("tables");
   };
 
   const handleSort = (field: string) => {
@@ -345,6 +347,8 @@ function AdminDashboard() {
               <ChevronRight className="h-3 w-3" />
               {activeView === "access-log" ? (
                 <span className="text-foreground font-medium">Terminal Access Log</span>
+              ) : activeView === "analytics" ? (
+                <span className="text-foreground font-medium">Bot Analytics</span>
               ) : activeTable ? (
                 <>
                   <span>PostgreSQL</span>
@@ -403,7 +407,9 @@ function AdminDashboard() {
         <div className="flex flex-1 overflow-hidden">
           {/* Data area */}
           <div className="flex flex-1 flex-col overflow-hidden">
-            {activeView === "access-log" ? (
+            {activeView === "analytics" ? (
+              <AnalyticsView />
+            ) : activeView === "access-log" ? (
               <AccessLogView />
             ) : activeTable ? (
               <>
