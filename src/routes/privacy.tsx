@@ -202,7 +202,7 @@ function PrivacyPage() {
               If you have any questions, concerns, or data deletion requests,
               please reach out through our official{" "}
               <a
-                href="https://discord.gg/uFhfGjaGW9"
+                href="https://discord.gg/bGh2wh8d3U"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gradient-hero font-medium underline underline-offset-2"

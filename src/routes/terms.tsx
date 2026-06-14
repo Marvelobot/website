@@ -205,7 +205,7 @@ function TermsPage() {
               If you have any questions or concerns about these Terms, you may
               reach us through our official{" "}
               <a
-                href="https://discord.gg/uFhfGjaGW9"
+                href="https://discord.gg/bGh2wh8d3U"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gradient-hero font-medium underline underline-offset-2"

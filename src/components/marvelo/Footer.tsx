@@ -22,9 +22,9 @@ const cols = [
   {
     title: "Community",
     links: [
-      ["Discord Server", "https://discord.gg/uFhfGjaGW9"],
+      ["Discord Server", "https://discord.gg/bGh2wh8d3U"],
       ["Guild Directory", "#"],
-      ["Support", "https://discord.gg/uFhfGjaGW9"],
+      ["Support", "https://discord.gg/bGh2wh8d3U"],
     ],
   },
   {
@@ -71,7 +71,7 @@ export function Footer() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               {[
-                { Icon: DiscordIcon, label: "Discord", url: "https://discord.gg/uFhfGjaGW9" },
+                { Icon: DiscordIcon, label: "Discord", url: "https://discord.gg/bGh2wh8d3U" },
                 { Icon: GithubIcon, label: "GitHub", url: "#" },
                 { Icon: XIcon, label: "X", url: "#" },
               ].map(({ Icon, label, url }) => (

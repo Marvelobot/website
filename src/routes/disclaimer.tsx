@@ -209,7 +209,7 @@ function DisclaimerPage() {
               For any legal inquiries, takedown requests, or concerns, please
               contact us through our official{" "}
               <a
-                href="https://discord.gg/uFhfGjaGW9"
+                href="https://discord.gg/bGh2wh8d3U"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gradient-hero font-medium underline underline-offset-2"
