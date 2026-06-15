@@ -16,7 +16,7 @@ const cols = [
     links: [
       ["Features", "#features"],
       ["Showcase", "#showcase"],
-      ["PvP Arena", "#arena"],
+      ["Premium Plans", "/premium"],
     ],
   },
   {
