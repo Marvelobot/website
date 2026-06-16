@@ -252,8 +252,16 @@ export interface PopularCommand {
   count: number;
 }
 
+export interface VoteAnalytics {
+  totalVoters: number;
+  totalDblVotes: number;
+  totalTopggVotes: number;
+  totalVotes: number;
+}
+
 export interface AnalyticsOverview {
   counts: AnalyticsCounts;
+  votes: VoteAnalytics;
   dau: DayCount[];
   dailyCommands: DayCount[];
   dailyRegistrations: DayCount[];
@@ -268,6 +276,7 @@ export interface HighRarityDrop {
   rarity: string;
   source: string;
   timestamp: string;
+  username?: string;
 }
 
 export interface BotUserAction {

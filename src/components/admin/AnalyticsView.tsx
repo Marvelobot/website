@@ -263,6 +263,42 @@ export function AnalyticsView() {
             </div>
           </div>
 
+          {/* ── Vote Analytics Panel ───────────────────────────────────────── */}
+          <div className="bg-[#060609] border border-white/[0.06] rounded-xl p-4 shadow-lg shadow-black/30">
+            <div className="flex items-center gap-2 mb-4 border-b border-white/[0.06] pb-3">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <h4 className="text-xs font-bold font-display uppercase tracking-wider text-foreground">
+                🗳️ Vote Analytics & Top.gg / DBL Activity
+              </h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-black/30 rounded-lg p-3 border border-white/[0.04]">
+                <p className="text-[10px] text-muted-foreground uppercase font-semibold">Total Unique Voters</p>
+                <h5 className="text-lg font-bold font-mono text-foreground mt-1">
+                  {overviewLoading ? "…" : overview?.votes?.totalVoters.toLocaleString() ?? "0"}
+                </h5>
+              </div>
+              <div className="bg-black/30 rounded-lg p-3 border border-white/[0.04]">
+                <p className="text-[10px] text-muted-foreground uppercase font-semibold">Total Votes Registered</p>
+                <h5 className="text-lg font-bold font-mono text-emerald-400 mt-1">
+                  {overviewLoading ? "…" : overview?.votes?.totalVotes.toLocaleString() ?? "0"}
+                </h5>
+              </div>
+              <div className="bg-black/30 rounded-lg p-3 border border-white/[0.04]">
+                <p className="text-[10px] text-muted-foreground uppercase font-semibold">DBL (Discord Bot List) Votes</p>
+                <h5 className="text-lg font-bold font-mono text-sky-400 mt-1">
+                  {overviewLoading ? "…" : overview?.votes?.totalDblVotes.toLocaleString() ?? "0"}
+                </h5>
+              </div>
+              <div className="bg-black/30 rounded-lg p-3 border border-white/[0.04]">
+                <p className="text-[10px] text-muted-foreground uppercase font-semibold">Top.gg Votes</p>
+                <h5 className="text-lg font-bold font-mono text-pink-400 mt-1">
+                  {overviewLoading ? "…" : overview?.votes?.totalTopggVotes.toLocaleString() ?? "0"}
+                </h5>
+              </div>
+            </div>
+          </div>
+
           {/* ── Charts Grid ───────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Daily Traffic Area Chart */}
@@ -480,6 +516,13 @@ export function AnalyticsView() {
                           {drop.rarity.toUpperCase()}
                         </Badge>
                       </div>
+
+                      {/* Username Detail */}
+                      {drop.username && (
+                        <div className="text-[9px] text-sky-400/95 font-semibold truncate mt-0.5 leading-none">
+                          @{drop.username}
+                        </div>
+                      )}
 
                       {/* Character Details */}
                       <div className="my-1.5">
