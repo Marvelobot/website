@@ -46,9 +46,11 @@ import {
   fetchAnalyticsOverview,
   fetchHighRarityDrops,
   fetchBotLogs,
+  fetchVoteAnalytics,
   type AnalyticsOverview,
   type HighRarityDrop,
   type BotUserAction,
+  type VoteHistoryItem,
 } from "@/lib/api/admin.functions";
 import { toast } from "sonner";
 
@@ -77,6 +79,11 @@ export function AnalyticsView() {
   const [overviewLoading, setOverviewLoading] = useState(true);
   const [dropsLoading, setDropsLoading] = useState(true);
   
+  // Vote Analytics States
+  const [voteInterval, setVoteInterval] = useState<"day" | "month" | "year">("day");
+  const [votesData, setVotesData] = useState<VoteHistoryItem[]>([]);
+  const [votesLoading, setVotesLoading] = useState(true);
+
   // Logs Pagination & Search
   const [logsLoading, setLogsLoading] = useState(true);
   const [logsPage, setLogsPage] = useState(1);
@@ -123,11 +130,29 @@ export function AnalyticsView() {
     }
   };
 
+  const loadVoteAnalytics = async (interval: "day" | "month" | "year") => {
+    try {
+      setVotesLoading(true);
+      const data = await fetchVoteAnalytics(interval);
+      setVotesData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setVotesLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadOverview();
     loadDrops();
     loadLogs(1, "");
+    loadVoteAnalytics(voteInterval);
   }, []);
+
+  const handleVoteIntervalChange = (interval: "day" | "month" | "year") => {
+    setVoteInterval(interval);
+    loadVoteAnalytics(interval);
+  };
 
   const handleSearchChange = (val: string) => {
     setSearch(val);
@@ -265,11 +290,31 @@ export function AnalyticsView() {
 
           {/* ── Vote Analytics Panel ───────────────────────────────────────── */}
           <div className="bg-[#060609] border border-white/[0.06] rounded-xl p-4 shadow-lg shadow-black/30">
-            <div className="flex items-center gap-2 mb-4 border-b border-white/[0.06] pb-3">
-              <Zap className="h-4 w-4 text-amber-400" />
-              <h4 className="text-xs font-bold font-display uppercase tracking-wider text-foreground">
-                🗳️ Vote Analytics & Top.gg / DBL Activity
-              </h4>
+            <div className="flex items-center justify-between mb-4 border-b border-white/[0.06] pb-3">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-amber-400" />
+                <h4 className="text-xs font-bold font-display uppercase tracking-wider text-foreground">
+                  🗳️ Vote Analytics & Top.gg / DBL Activity
+                </h4>
+              </div>
+              <div className="flex items-center gap-1 bg-white/[0.02] border border-white/[0.06] rounded-lg p-0.5">
+                {(["day", "month", "year"] as const).map((interval) => (
+                  <Button
+                    key={interval}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleVoteIntervalChange(interval)}
+                    className={cn(
+                      "h-6 text-[10px] px-2 uppercase font-semibold tracking-wider rounded-md transition-all",
+                      voteInterval === interval
+                        ? "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/[0.02]"
+                    )}
+                  >
+                    {interval === "day" ? "Date" : interval}
+                  </Button>
+                ))}
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-black/30 rounded-lg p-3 border border-white/[0.04]">
@@ -296,6 +341,58 @@ export function AnalyticsView() {
                   {overviewLoading ? "…" : overview?.votes?.totalTopggVotes.toLocaleString() ?? "0"}
                 </h5>
               </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-white/[0.04] h-[220px]">
+              {votesLoading ? (
+                <Skeleton className="w-full h-full" />
+              ) : votesData.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
+                  No voting history recorded.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={votesData}>
+                    <defs>
+                      <linearGradient id="colorVotes" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                    <XAxis 
+                      dataKey="label" 
+                      stroke="rgba(255,255,255,0.4)" 
+                      fontSize={9} 
+                      tickLine={false}
+                      tickFormatter={(val) => {
+                        if (voteInterval === "day") {
+                          return formatDateLabel(val);
+                        }
+                        return val;
+                      }}
+                    />
+                    <YAxis stroke="rgba(255,255,255,0.4)" fontSize={9} tickLine={false} axisLine={false} />
+                    <ChartTooltip
+                      contentStyle={{
+                        backgroundColor: "#060609",
+                        borderColor: "rgba(255,255,255,0.08)",
+                        borderRadius: "8px",
+                      }}
+                      labelClassName="text-[10px] text-muted-foreground font-semibold"
+                      itemStyle={{ fontSize: "11px", color: "#10b981" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      name="Votes"
+                      stroke="#10b981"
+                      strokeWidth={1.5}
+                      fillOpacity={1}
+                      fill="url(#colorVotes)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 

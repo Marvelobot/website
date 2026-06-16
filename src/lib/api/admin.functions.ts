@@ -339,3 +339,15 @@ export async function fetchBotLogs(page = 1, limit = 20, search = ""): Promise<B
     }
   };
 }
+
+export interface VoteHistoryItem {
+  label: string;
+  count: number;
+}
+
+export async function fetchVoteAnalytics(interval: "day" | "month" | "year" = "day"): Promise<VoteHistoryItem[]> {
+  const res = await fetch(`${API_BASE}/api/admin/analytics/votes?interval=${interval}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<VoteHistoryItem[]>(res);
+}
