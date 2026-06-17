@@ -574,9 +574,9 @@ export function AnalyticsView() {
               </h4>
             </div>
             {dropsLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                  <Skeleton key={i} className="h-32 w-full rounded-xl" />
                 ))}
               </div>
             ) : drops.length === 0 ? (
@@ -584,14 +584,14 @@ export function AnalyticsView() {
                 No Legendary or Mythic drops recorded in database.
               </p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {drops.map((drop) => {
                   const isMythic = drop.rarity.toLowerCase() === "mythic";
                   return (
                     <div
                       key={drop.id}
                       className={cn(
-                        "relative bg-black/40 rounded-xl p-3 border hover:brightness-110 transition-all flex flex-col justify-between h-28 shadow-lg",
+                        "relative bg-black/40 rounded-xl p-3 border hover:brightness-110 transition-all flex flex-col justify-between h-32 shadow-lg",
                         isMythic
                           ? "border-[#d946ef]/20 shadow-[#d946ef]/5 hover:shadow-[#d946ef]/15"
                           : "border-[#f59e0b]/20 shadow-[#f59e0b]/5 hover:shadow-[#f59e0b]/15",
@@ -616,7 +616,7 @@ export function AnalyticsView() {
 
                       {/* Username Detail */}
                       {drop.username && (
-                        <div className="text-[9px] text-sky-400/95 font-semibold truncate mt-0.5 leading-none">
+                        <div className="text-[10px] text-sky-400/95 font-semibold truncate mt-1 leading-none">
                           @{drop.username}
                         </div>
                       )}
