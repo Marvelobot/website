@@ -127,6 +127,8 @@ function PremiumPage() {
       features: [
         "⏱️ 45m Spawner Intervals (down from 60m)",
         "📢 Up to 5 Auto-Spawn channels (up from 2)",
+        "🪙 +5% Server Coins Booster (daily & claims)",
+        "✨ Guarantees 75%+ Quality cards on drops",
         "⚙️ 10 Spawner Config Changes per day (up from 5)",
         "🎉 1 Server Happy Hour per week (lasts 2 hours)"
       ]
@@ -141,6 +143,9 @@ function PremiumPage() {
       features: [
         "⏱️ 30m Spawner Intervals (down from 60m)",
         "📢 Up to 25 Auto-Spawn channels (up from 20)",
+        "🪙 +10% Server Coins Booster (daily & claims)",
+        "✨ Guarantees 80%+ Quality cards on drops",
+        "🛒 5% Discount on all Credits Shop items",
         "⚙️ 25 Spawner Config Changes per day (up from 5)",
         "🎉 3 Server Happy Hours per week (lasts 2 hours each)"
       ]
@@ -154,6 +159,9 @@ function PremiumPage() {
       features: [
         "⏱️ 20m Spawner Intervals (down from 60m)",
         "📢 Up to 40 Auto-Spawn channels (up from 20)",
+        "🪙 +15% Server Coins Booster (daily & claims)",
+        "✨ Guarantees 85%+ Quality cards on drops",
+        "🛒 10% Discount on all Credits Shop items",
         "⚙️ 50 Spawner Config Changes per day (up from 5)",
         "🎉 5 Server Happy Hours per week (lasts 2 hours each)"
       ]
