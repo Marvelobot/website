@@ -42,6 +42,8 @@ function PremiumPage() {
   
   // Checkout Modal State
   const [targetId, setTargetId] = useState("");
+  const [buyerId, setBuyerId] = useState("");
+  const [agreedTerms, setAgreedTerms] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verifiedTarget, setVerifiedTarget] = useState<{ name: string } | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ function PremiumPage() {
   // PayPal SDK Loading State
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [clientId, setClientId] = useState<string | null>(null);
+  const [plansConfig, setPlansConfig] = useState<Record<string, string>>({});
   
   // Payment Capture State
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
@@ -195,8 +198,6 @@ function PremiumPage() {
     }
   ];
 
-  const [plansConfig, setPlansConfig] = useState<Record<string, string>>({});
-
   // 1. Fetch PayPal client ID on mount
   useEffect(() => {
     console.log("[paypal] Fetching configuration from:", `${API_BASE}/api/payments/config`);
@@ -275,12 +276,13 @@ function PremiumPage() {
 
   // 3. Render PayPal smart buttons when requirements are met
   useEffect(() => {
-    if (paypalLoaded && verifiedTarget && showPaypalButtons && paypalRef.current && selectedItem) {
+    if (paypalLoaded && verifiedTarget && showPaypalButtons && agreedTerms && paypalRef.current && selectedItem) {
       console.log(`[paypal-buttons] Preparing to render buttons for item: ${selectedItem.id}`);
       paypalRef.current.innerHTML = "";
 
       const activePlanId = plansConfig[selectedItem.id];
       const isSubscription = (selectedItem.type === "user_premium" || selectedItem.type === "server_premium") && activePlanId;
+      const cleanBuyerId = selectedItem.type === "server_premium" ? buyerId : targetId;
 
       const buttonOptions: any = {
         style: {
@@ -301,7 +303,7 @@ function PremiumPage() {
         buttonOptions.createSubscription = (data: any, actions: any) => {
           return actions.subscription.create({
             plan_id: activePlanId,
-            custom_id: `${selectedItem.type}:${selectedItem.id}:${targetId}`,
+            custom_id: `${selectedItem.type}:${selectedItem.id}:${targetId}:${cleanBuyerId}`,
           });
         };
         buttonOptions.onApprove = async (data: any) => {
@@ -315,6 +317,7 @@ function PremiumPage() {
                 subscriptionId: data.subscriptionID,
                 itemId: selectedItem.id,
                 targetId: targetId,
+                buyerId: cleanBuyerId,
               }),
             });
             const captureData = await res.json();
@@ -343,6 +346,7 @@ function PremiumPage() {
               body: JSON.stringify({
                 itemId: selectedItem.id,
                 targetId: targetId,
+                buyerId: cleanBuyerId,
               }),
             });
             const data = await res.json();
@@ -387,11 +391,16 @@ function PremiumPage() {
 
       window.paypal.Buttons(buttonOptions).render(paypalRef.current);
     }
-  }, [paypalLoaded, verifiedTarget, showPaypalButtons, selectedItem, targetId, plansConfig]);
+  }, [paypalLoaded, verifiedTarget, showPaypalButtons, agreedTerms, selectedItem, targetId, buyerId, plansConfig]);
 
   const verifyTargetId = async () => {
     if (!targetId || !/^\d+$/.test(targetId)) {
       setVerifyError("Please enter a valid numeric ID.");
+      return;
+    }
+
+    if (selectedItem?.type === "server_premium" && (!buyerId || !/^\d+$/.test(buyerId))) {
+      setVerifyError("Please enter a valid Discord User ID for the buyer.");
       return;
     }
 
@@ -410,6 +419,19 @@ function PremiumPage() {
       const data = await res.json();
       
       if (data.success) {
+        if (type === "server") {
+          const buyerRes = await fetch(`${API_BASE}/api/payments/verify-target`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "user", targetId: buyerId }),
+          });
+          const buyerData = await buyerRes.json();
+          if (!buyerData.success) {
+            setVerifyError("Buyer Discord ID is not registered in the database. Ensure the buyer ran `/register` first.");
+            return;
+          }
+        }
+
         setVerifiedTarget(data.data);
         setShowPaypalButtons(true);
       } else {
@@ -426,6 +448,8 @@ function PremiumPage() {
   const closeCheckout = () => {
     setSelectedItem(null);
     setTargetId("");
+    setBuyerId("");
+    setAgreedTerms(false);
     setVerifiedTarget(null);
     setVerifyError(null);
     setShowPaypalButtons(false);
@@ -557,7 +581,7 @@ function PremiumPage() {
             ))}
           </div>
 
-          {/* Yearly Bonus Banner (Only visible on User Tab) */}
+          {/* Yearly Banner */}
           {activeTab === "user" && (
             <div className="mt-16 relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8"
               style={{
@@ -606,7 +630,7 @@ function PremiumPage() {
       {/* Checkout overlay modal */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-surface p-8 shadow-2xl flex flex-col justify-between">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-surface p-8 shadow-2xl flex flex-col justify-between max-h-[90vh] overflow-y-auto">
             
             {/* Header info */}
             <div>
@@ -626,73 +650,117 @@ function PremiumPage() {
 
             {/* Verification Step */}
             {paymentStatus === "idle" && (
-              <div className="my-6">
-                <div className="flex items-center gap-2 mb-2 text-white/80">
-                  {selectedItem.type === "server_premium" ? <Server className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
-                  <span className="text-sm font-semibold">
-                    {selectedItem.type === "server_premium" ? "Discord Server ID" : "Discord User ID"}
-                  </span>
-                </div>
-                
-                <p className="text-xs text-white/50 mb-3">
-                  Enter your Discord ID to verify configuration. Enable Developer Mode in Discord, right-click, and select "Copy ID".
-                </p>
+              <div className="my-6 space-y-4">
+                {/* ID input for Target */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2 text-white/80">
+                    {selectedItem.type === "server_premium" ? <Server className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
+                    <span className="text-sm font-semibold">
+                      {selectedItem.type === "server_premium" ? "Discord Server ID" : "Discord User ID"}
+                    </span>
+                  </div>
+                  
+                  <p className="text-xs text-white/50 mb-3">
+                    Enter the Discord Snowflake ID of the target to upgrade. Enable Developer Mode in Discord settings, right-click, and copy the ID.
+                  </p>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={targetId}
-                    onChange={(e) => setTargetId(e.target.value)}
-                    disabled={verifiedTarget !== null}
-                    placeholder={selectedItem.type === "server_premium" ? "e.g., 901234567890123456" : "e.g., 1501541929819574296"}
-                    className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 disabled:opacity-50"
-                  />
-                  {verifiedTarget ? (
-                    <button
-                      onClick={() => {
-                        setVerifiedTarget(null);
-                        setShowPaypalButtons(false);
-                      }}
-                      className="px-4 py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-semibold transition-all"
-                    >
-                      Change
-                    </button>
-                  ) : (
-                    <button
-                      onClick={verifyTargetId}
-                      disabled={verifying || !targetId}
-                      className="px-5 py-3 bg-white text-black font-bold rounded-xl text-sm flex items-center gap-1 hover:bg-white/95 disabled:opacity-50"
-                    >
-                      {verifying && <Loader2 className="h-4 w-4 animate-spin" />} Verify
-                    </button>
-                  )}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={targetId}
+                      onChange={(e) => setTargetId(e.target.value)}
+                      disabled={verifiedTarget !== null}
+                      placeholder={selectedItem.type === "server_premium" ? "e.g., 901234567890123456" : "e.g., 1501541929819574296"}
+                      className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                    />
+                  </div>
                 </div>
+
+                {/* Additional Buyer ID input for Server upgrades */}
+                {selectedItem.type === "server_premium" && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2 text-white/80">
+                      <Shield className="h-5 w-5" />
+                      <span className="text-sm font-semibold">Buyer Discord User ID</span>
+                    </div>
+                    <p className="text-xs text-white/50 mb-3">
+                      Enter your personal Discord User ID to receive the bot payment receipt DM and confirmation details.
+                    </p>
+                    <input
+                      type="text"
+                      value={buyerId}
+                      onChange={(e) => setBuyerId(e.target.value)}
+                      disabled={verifiedTarget !== null}
+                      placeholder="e.g., 1501541929819574296"
+                      className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                    />
+                  </div>
+                )}
+
+                {/* Verification Actions */}
+                {!verifiedTarget && (
+                  <button
+                    onClick={verifyTargetId}
+                    disabled={verifying || !targetId || (selectedItem.type === "server_premium" && !buyerId)}
+                    className="w-full py-3 bg-white text-black font-bold rounded-xl text-sm flex items-center justify-center gap-1 hover:bg-white/95 disabled:opacity-50 transition-colors"
+                  >
+                    {verifying && <Loader2 className="h-4 w-4 animate-spin" />} Verify Discord Configurations
+                  </button>
+                )}
 
                 {verifyError && (
-                  <div className="mt-3 flex items-center gap-2 text-red-400 bg-red-950/20 border border-red-900/30 rounded-xl p-3 text-xs">
+                  <div className="flex items-center gap-2 text-red-400 bg-red-950/20 border border-red-900/30 rounded-xl p-3 text-xs">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>{verifyError}</span>
                   </div>
                 )}
 
                 {verifiedTarget && (
-                  <div className="mt-3 flex items-center justify-between text-green-400 bg-green-950/20 border border-green-900/30 rounded-xl p-3 text-xs">
+                  <div className="flex items-center justify-between text-green-400 bg-green-950/20 border border-green-900/30 rounded-xl p-3 text-xs">
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4" />
-                      <span>Linked: <strong>{verifiedTarget.name}</strong></span>
+                      <span>Configuration verified: <strong>{verifiedTarget.name}</strong></span>
                     </div>
+                    <button
+                      onClick={() => {
+                        setVerifiedTarget(null);
+                        setShowPaypalButtons(false);
+                      }}
+                      className="text-xs underline hover:text-green-300 font-semibold"
+                    >
+                      Change
+                    </button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Smart PayPal Buttons Render Container */}
+            {/* Strict Legal Policy Checkbox Section */}
             {showPaypalButtons && paymentStatus === "idle" && (
-              <div className="mt-4 border-t border-white/5 pt-6">
+              <div className="my-4 p-4 border border-white/5 bg-white/[0.01] rounded-2xl text-xs space-y-3">
+                <h4 className="font-display font-bold text-white uppercase tracking-wider">Purchase Terms & Strict Return Policy</h4>
+                <p className="text-white/60 leading-relaxed">
+                  All transactions for premium gems, credits, and subscription packages are final, digital, and strictly **NON-REFUNDABLE**. You may cancel user or server subscriptions at any time via your PayPal account to halt upcoming renewals, but active billing time is non-prorated. Opening a payment dispute or chargeback will result in automatic blacklist ban from all bot services.
+                </p>
+                <label className="flex items-start gap-2.5 text-white/80 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agreedTerms}
+                    onChange={(e) => setAgreedTerms(e.target.checked)}
+                    className="mt-0.5 rounded border-white/20 bg-white/5 text-amber-500 focus:ring-0 cursor-pointer"
+                  />
+                  <span>I agree to the strict No-Refund Policy and Terms of Sale.</span>
+                </label>
+              </div>
+            )}
+
+            {/* Smart PayPal Buttons Render Container */}
+            {showPaypalButtons && agreedTerms && paymentStatus === "idle" && (
+              <div className="mt-2 border-t border-white/5 pt-4">
                 {!paypalLoaded ? (
                   <div className="flex flex-col items-center justify-center py-6 gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-                    <span className="text-xs text-white/50">Loading PayPal SDK...</span>
+                    <span className="text-xs text-white/50">Loading PayPal Checkout...</span>
                   </div>
                 ) : (
                   <div ref={paypalRef} className="w-full"></div>
@@ -705,8 +773,8 @@ function PremiumPage() {
               <div className="my-10 flex flex-col items-center justify-center text-center gap-4 animate-pulse">
                 <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
                 <div>
-                  <h4 className="font-display text-lg font-bold text-white">Capturing Payment</h4>
-                  <p className="text-xs text-white/50 mt-1">Please do not refresh or close this tab. Verifying order transaction...</p>
+                  <h4 className="font-display text-lg font-bold text-white">Verifying Transaction</h4>
+                  <p className="text-xs text-white/50 mt-1">Please do not refresh or close this tab. Crediting your account details...</p>
                 </div>
               </div>
             )}
@@ -718,16 +786,16 @@ function PremiumPage() {
                   <Check className="h-8 w-8" />
                 </div>
                 <div>
-                  <h4 className="font-display text-2xl font-black text-white">Upgrade Successful!</h4>
+                  <h4 className="font-display text-2xl font-black text-white">Upgrade Active!</h4>
                   <p className="text-sm text-white/60 mt-2">
-                    Premium privileges have been activated for <strong>{verifiedTarget?.name}</strong>. Enjoy your new features!
+                    Privileges have been successfully provisioned. We have sent a confirmation direct message directly to your Discord inbox.
                   </p>
                 </div>
                 <button
                   onClick={closeCheckout}
-                  className="mt-6 px-6 py-2.5 bg-white text-black font-bold rounded-xl text-sm hover:bg-white/95"
+                  className="mt-6 px-6 py-2.5 bg-white text-black font-bold rounded-xl text-sm hover:bg-white/95 shadow-md"
                 >
-                  Done
+                  Confirm & Close
                 </button>
               </div>
             )}
@@ -739,7 +807,7 @@ function PremiumPage() {
                   <AlertCircle className="h-8 w-8" />
                 </div>
                 <div>
-                  <h4 className="font-display text-xl font-bold text-white">Transaction Error</h4>
+                  <h4 className="font-display text-xl font-bold text-white">Transaction Failed</h4>
                   <p className="text-xs text-red-400 mt-2">{paymentError || "An error occurred capturing the order."}</p>
                 </div>
                 <div className="flex gap-2 w-full mt-4">
