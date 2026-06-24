@@ -71,6 +71,7 @@ function PremiumPage() {
       description: "Casual collector bundle offering daily credit boosts and reduced drop cooldowns.",
       features: [
         "⏱️ 45m Drop Cooldown (down from 60m)",
+        "🎁 250 Gems monthly bonus (credited at month-end)",
         "⚡ 1.2x Credits on daily claims",
         "✨ +10 Cosmic Dust bonus daily",
         "🪙 8% Marketplace Tax (down from 10%)",
@@ -88,6 +89,7 @@ function PremiumPage() {
       recommended: true,
       features: [
         "⏱️ 30m Drop Cooldown",
+        "🎁 500 Gems monthly bonus (credited at month-end)",
         "⚡ 1.5x Credits on daily claims",
         "✨ +25 Cosmic Dust bonus daily",
         "🪙 5% Marketplace Tax (down from 10%)",
@@ -104,6 +106,7 @@ function PremiumPage() {
       description: "Ultimate entity level. Fast drop frequencies, tax immunity, and ultimate collection score perks.",
       features: [
         "⏱️ 20m Drop Cooldown",
+        "🎁 1,000 Gems monthly bonus (credited at month-end)",
         "⚡ 2.0x Credits on daily claims",
         "✨ +50 Cosmic Dust bonus daily",
         "🪙 0% Marketplace Tax (100% tax-free!)",
@@ -124,7 +127,7 @@ function PremiumPage() {
       features: [
         "⏱️ 45m Spawner Intervals (down from 60m)",
         "📢 Up to 5 Auto-Spawn channels (up from 2)",
-        "⚙️ 5 Spawner Config Changes per day",
+        "⚙️ 10 Spawner Config Changes per day (up from 5)",
         "🎉 1 Server Happy Hour per week (lasts 2 hours)"
       ]
     },
@@ -137,9 +140,9 @@ function PremiumPage() {
       description: "Excellent for medium to large size Discord servers that want highly active cards drops.",
       features: [
         "⏱️ 30m Spawner Intervals (down from 60m)",
-        "📢 Up to 20 Auto-Spawn channels (up from 2)",
-        "⚙️ 5 Spawner Config Changes per day",
-        "🎉 2 Server Happy Hours per week (lasts 2 hours each)"
+        "📢 Up to 25 Auto-Spawn channels (up from 20)",
+        "⚙️ 25 Spawner Config Changes per day (up from 5)",
+        "🎉 3 Server Happy Hours per week (lasts 2 hours each)"
       ]
     },
     {
@@ -150,9 +153,9 @@ function PremiumPage() {
       description: "High-octane server settings. Rapid 20-minute spawn rates for large gaming hubs.",
       features: [
         "⏱️ 20m Spawner Intervals (down from 60m)",
-        "📢 Up to 20 Auto-Spawn channels (up from 2)",
-        "⚙️ 5 Spawner Config Changes per day",
-        "🎉 2 Server Happy Hours per week (lasts 2 hours each)"
+        "📢 Up to 40 Auto-Spawn channels (up from 20)",
+        "⚙️ 50 Spawner Config Changes per day (up from 5)",
+        "🎉 5 Server Happy Hours per week (lasts 2 hours each)"
       ]
     }
   ];
