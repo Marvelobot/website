@@ -554,6 +554,9 @@ function PremiumPage() {
                   
                   <div className="mt-6 flex items-baseline">
                     <span className="text-4xl font-black text-white">{item.price}</span>
+                    {item.id === "user-tier-3" && (
+                      <span className="text-lg text-white/40 line-through ml-2">$12.00</span>
+                    )}
                     {item.type !== "gems" && <span className="text-sm text-white/50 ml-1"> / month</span>}
                   </div>
 
@@ -594,10 +597,10 @@ function PremiumPage() {
                 </span>
                 <h3 className="mt-4 font-display text-3xl font-bold text-white">Yearly Basic Supporter</h3>
                 <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                  Support our developmental costs for a full calendar year and get instant access to 250 Cosmic Dust rewards, 3 Battle Credits, and a founding supporter profile emblem!
+                  Support our developmental costs for a full calendar year and get instant access to 250 Cosmic Dust rewards, 3 Battle Credits, a founding supporter profile emblem, and 500 Gems at the end of your first month!
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-4">
-                  {["🎁 250 Cosmic Dust reward", "🎫 3 Battle Credits bonus", "✨ 10% card fusing cost discount", "🛡️ Founding Supporter Emblem"].map((feat, i) => (
+                  {["🎁 250 Cosmic Dust reward", "🎫 3 Battle Credits bonus", "💎 500 Gems at end of 1st month", "✨ 10% card fusing cost discount", "🛡️ Founding Supporter Emblem"].map((feat, i) => (
                     <div key={i} className="flex items-center text-sm text-white/80">
                       <span className="mr-2">✔️</span>
                       <span>{feat}</span>
@@ -614,8 +617,8 @@ function PremiumPage() {
                     name: "Yearly Supporter (Basic)",
                     price: "$25.00",
                     type: "user_premium",
-                    description: "Annual S.H.I.E.L.D Recruit package with bulk benefits.",
-                    features: ["Includes all basic user tier benefits", "Annual registration profile badge"]
+                    description: "Annual S.H.I.E.L.D Recruit package with bulk benefits. Includes a special yearly perk of 500 Gems awarded at the end of the 1st month of subscription.",
+                    features: ["Includes all basic user tier benefits", "Annual registration profile badge", "💎 500 Gems at end of 1st month of subscription"]
                   })}
                   className="mt-6 w-full md:w-auto py-3 px-8 rounded-xl bg-white text-black font-bold hover:bg-white/95 transition-colors shadow-lg"
                 >
