@@ -195,113 +195,199 @@ function PremiumPage() {
     }
   ];
 
+  const [plansConfig, setPlansConfig] = useState<Record<string, string>>({});
+
   // 1. Fetch PayPal client ID on mount
   useEffect(() => {
+    console.log("[paypal] Fetching configuration from:", `${API_BASE}/api/payments/config`);
     fetch(`${API_BASE}/api/payments/config`)
-      .then((res) => res.json())
+      .then((res) => {
+        console.log("[paypal] Config response status:", res.status);
+        return res.json();
+      })
       .then((resData) => {
         if (resData.success && resData.data.clientId) {
-          setClientId(resData.data.clientId);
+          const cleanId = resData.data.clientId.trim();
+          console.log("[paypal] Successfully fetched Client ID:", cleanId);
+          setClientId(cleanId);
+          if (resData.data.plans) {
+            console.log("[paypal] Successfully fetched Plan IDs:", resData.data.plans);
+            setPlansConfig(resData.data.plans);
+          }
+        } else {
+          console.error("[paypal] Config did not return a valid client ID:", resData);
         }
       })
-      .catch((err) => console.error("Error fetching PayPal config:", err));
+      .catch((err) => {
+        console.error("[paypal] Failed to fetch configuration:", err);
+      });
   }, []);
 
-  // 2. Inject PayPal SDK script
+  // 2. Inject/Reload PayPal SDK script dynamically
   useEffect(() => {
-    if (!clientId) return;
-
-    if (window.paypal) {
-      setPaypalLoaded(true);
+    if (!clientId) {
+      console.log("[paypal] Client ID not loaded yet. Skipping script injection.");
       return;
     }
 
+    const cleanId = clientId.trim();
+    const activePlanId = selectedItem ? plansConfig[selectedItem.id] : null;
+    const isSubscription = (selectedItem?.type === "user_premium" || selectedItem?.type === "server_premium") && activePlanId;
+
+    const scriptUrl = `https://www.paypal.com/sdk/js?client-id=${cleanId}&currency=USD${
+      isSubscription ? "&vault=true&intent=subscription" : ""
+    }`;
+
+    console.log(`[paypal] Script load initialized. Type: "${selectedItem?.type || "none"}", Plan ID: "${activePlanId || "none"}", Sub Mode: ${!!isSubscription}. URL: ${scriptUrl}`);
+    setPaypalLoaded(false);
+
     const existing = document.getElementById("paypal-sdk-script");
     if (existing) {
+      console.log("[paypal] Removing existing script to re-inject with updated parameters.");
       existing.remove();
+      if (window.paypal) {
+        delete window.paypal;
+      }
     }
 
     const script = document.createElement("script");
     script.id = "paypal-sdk-script";
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+    script.src = scriptUrl;
     script.async = true;
     script.onload = () => {
+      console.log("[paypal] Script loaded successfully. window.paypal initialized:", !!window.paypal);
       setPaypalLoaded(true);
+    };
+    script.onerror = (e) => {
+      console.error("[paypal] Script failed to load:", e);
+      setPaymentError("Failed to load PayPal SDK script. Verify Client ID configuration.");
     };
     document.body.appendChild(script);
 
     return () => {
       const sc = document.getElementById("paypal-sdk-script");
-      if (sc) sc.remove();
+      if (sc) {
+        console.log("[paypal] Cleanup: removing script element.");
+        sc.remove();
+      }
     };
-  }, [clientId]);
+  }, [clientId, selectedItem?.id, plansConfig]);
 
   // 3. Render PayPal smart buttons when requirements are met
   useEffect(() => {
     if (paypalLoaded && verifiedTarget && showPaypalButtons && paypalRef.current && selectedItem) {
+      console.log(`[paypal-buttons] Preparing to render buttons for item: ${selectedItem.id}`);
       paypalRef.current.innerHTML = "";
 
-      window.paypal
-        .Buttons({
-          style: {
-            layout: "vertical",
-            color: "gold",
-            shape: "rect",
-            label: "paypal",
-          },
-          createOrder: async () => {
-            try {
-              const res = await fetch(`${API_BASE}/api/payments/create-order`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  itemId: selectedItem.id,
-                  targetId: targetId,
-                }),
-              });
-              const data = await res.json();
-              if (!data.success) {
-                alert(data.error || "Failed to create order.");
-                throw new Error(data.error);
-              }
-              return data.orderId;
-            } catch (err: any) {
-              console.error(err);
-              throw err;
-            }
-          },
-          onApprove: async (data: any) => {
-            setPaymentStatus("processing");
-            try {
-              const res = await fetch(`${API_BASE}/api/payments/capture-order`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  orderId: data.orderId,
-                }),
-              });
-              const captureData = await res.json();
-              if (captureData.success) {
-                setPaymentStatus("success");
-              } else {
-                setPaymentError(captureData.error || "Transaction capture failed.");
-                setPaymentStatus("error");
-              }
-            } catch (err: any) {
-              console.error(err);
-              setPaymentError(err.message || "An unexpected error occurred.");
+      const activePlanId = plansConfig[selectedItem.id];
+      const isSubscription = (selectedItem.type === "user_premium" || selectedItem.type === "server_premium") && activePlanId;
+
+      const buttonOptions: any = {
+        style: {
+          layout: "vertical",
+          color: "gold",
+          shape: "rect",
+          label: isSubscription ? "subscribe" : "paypal",
+        },
+        onError: (err: any) => {
+          console.error("[paypal-buttons] Error handler callback executed:", err);
+          setPaymentError("Checkout transaction failed. Please retry.");
+          setPaymentStatus("error");
+        }
+      };
+
+      if (isSubscription) {
+        console.log(`[paypal-buttons] Creating subscription flow with Plan ID: ${activePlanId}`);
+        buttonOptions.createSubscription = (data: any, actions: any) => {
+          return actions.subscription.create({
+            plan_id: activePlanId,
+            custom_id: `${selectedItem.type}:${selectedItem.id}:${targetId}`,
+          });
+        };
+        buttonOptions.onApprove = async (data: any) => {
+          console.log("[paypal-buttons] Subscription approved. ID:", data.subscriptionID);
+          setPaymentStatus("processing");
+          try {
+            const res = await fetch(`${API_BASE}/api/payments/capture-order`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                subscriptionId: data.subscriptionID,
+                itemId: selectedItem.id,
+                targetId: targetId,
+              }),
+            });
+            const captureData = await res.json();
+            if (captureData.success) {
+              console.log("[paypal-buttons] Subscription successfully synced to DB.");
+              setPaymentStatus("success");
+            } else {
+              console.error("[paypal-buttons] Subscription sync error:", captureData.error);
+              setPaymentError(captureData.error || "Failed to sync subscription details to DB.");
               setPaymentStatus("error");
             }
-          },
-          onError: (err: any) => {
-            console.error("PayPal Error:", err);
-            setPaymentError("Checkout failed. Please ensure the target ID matches the billing details.");
+          } catch (err: any) {
+            console.error("[paypal-buttons] Error capturing subscription approval:", err);
+            setPaymentError(err.message || "Failed to sync subscription.");
             setPaymentStatus("error");
-          },
-        })
-        .render(paypalRef.current);
+          }
+        };
+      } else {
+        console.log("[paypal-buttons] Creating standard checkout order flow");
+        buttonOptions.createOrder = async () => {
+          try {
+            console.log("[paypal-buttons] Triggering order creation endpoint");
+            const res = await fetch(`${API_BASE}/api/payments/create-order`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                itemId: selectedItem.id,
+                targetId: targetId,
+              }),
+            });
+            const data = await res.json();
+            if (!data.success) {
+              alert(data.error || "Failed to create order.");
+              throw new Error(data.error);
+            }
+            console.log("[paypal-buttons] Order successfully created. ID:", data.orderId);
+            return data.orderId;
+          } catch (err: any) {
+            console.error("[paypal-buttons] createOrder error:", err);
+            throw err;
+          }
+        };
+        buttonOptions.onApprove = async (data: any) => {
+          console.log("[paypal-buttons] Checkout approved. Capturing order ID:", data.orderId);
+          setPaymentStatus("processing");
+          try {
+            const res = await fetch(`${API_BASE}/api/payments/capture-order`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: data.orderId,
+              }),
+            });
+            const captureData = await res.json();
+            if (captureData.success) {
+              console.log("[paypal-buttons] Payment captured and database updated.");
+              setPaymentStatus("success");
+            } else {
+              console.error("[paypal-buttons] Capture error:", captureData.error);
+              setPaymentError(captureData.error || "Transaction capture failed.");
+              setPaymentStatus("error");
+            }
+          } catch (err: any) {
+            console.error("[paypal-buttons] capture order execution failed:", err);
+            setPaymentError(err.message || "An unexpected error occurred.");
+            setPaymentStatus("error");
+          }
+        };
+      }
+
+      window.paypal.Buttons(buttonOptions).render(paypalRef.current);
     }
-  }, [paypalLoaded, verifiedTarget, showPaypalButtons, selectedItem, targetId]);
+  }, [paypalLoaded, verifiedTarget, showPaypalButtons, selectedItem, targetId, plansConfig]);
 
   const verifyTargetId = async () => {
     if (!targetId || !/^\d+$/.test(targetId)) {
